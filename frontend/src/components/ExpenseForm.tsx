@@ -2,11 +2,11 @@
  * Form component for adding/editing expenses
  */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ExpenseFormData } from "../types";
-import { EXPENSE_CATEGORIES } from "../constants/categories";
 import { TextField, SelectBox, Button } from "../vibes";
 import { useExpenseForm } from "../hooks/useExpenseForm";
+import { fetchCategories } from "../services/api"; // your API service
 
 interface ExpenseFormProps {
   initialData?: Partial<ExpenseFormData>;
@@ -27,6 +27,24 @@ export function ExpenseForm({
       onSubmit,
     });
 
+  const [categories, setCategories] = useState<Array<{ value: string; label: string }>>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const data = await fetchCategories();
+        setCategories(data.map((c) => ({ value: c.name, label: c.name })));
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+      } finally {
+        setLoadingCategories(false);
+      }
+    }
+
+    loadCategories();
+  }, []);
+
   const formStyle: React.CSSProperties = {
     display: "flex",
     flexDirection: "column",
@@ -38,11 +56,6 @@ export function ExpenseForm({
     gap: "0.5rem",
     marginTop: "0.5rem",
   };
-
-  const categoryOptions = EXPENSE_CATEGORIES.map((category) => ({
-    value: category,
-    label: category,
-  }));
 
   return (
     <form onSubmit={handleSubmit} style={formStyle}>
@@ -71,12 +84,13 @@ export function ExpenseForm({
 
       <SelectBox
         label="Category"
-        options={categoryOptions}
+        options={categories}
         value={formData.category}
         onChange={(e) => handleChange("category", e.target.value)}
         error={errors.category}
         fullWidth
         required
+        disabled={loadingCategories}
       />
 
       <TextField

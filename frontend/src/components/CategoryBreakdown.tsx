@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { CATEGORY_EMOJIS } from "../constants/categoryEmojis";
 import { COLORS } from "../constants/colors";
+import { CategoryModal } from "./CategoryModal";
 
 interface CategoryData {
   category: string;
@@ -19,12 +20,12 @@ const CategoryBreakdown: React.FC<CategoryBreakdownProps> = ({
   total,
   totalCount,
 }) => {
-  const [isCollapsed, setIsCollapsed] = React.useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isAddCategoryModalOpen, setIsAddCategoryModalOpen] = useState(false);
 
-  const formatAmount = (amount: number) => {
-    return `$${amount.toFixed(2)}`;
-  };
+  const formatAmount = (amount: number) => `$${amount.toFixed(2)}`;
 
+  // --- Styles ---
   const containerStyle: React.CSSProperties = {
     background: "white",
     borderRadius: "12px",
@@ -42,23 +43,17 @@ const CategoryBreakdown: React.FC<CategoryBreakdownProps> = ({
     cursor: "pointer",
   };
 
-  const totalLabelStyle: React.CSSProperties = {
-    fontSize: "14px",
+  const addCategoryButtonStyle: React.CSSProperties = {
+    marginLeft: "16px",
+    padding: "8px 16px",
+    background: COLORS.primary.p05,
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
     fontWeight: 600,
-    color: COLORS.secondary.s08,
-    letterSpacing: "0.05em",
-  };
-
-  const totalAmountStyle: React.CSSProperties = {
-    fontSize: "32px",
-    fontWeight: 700,
-    color: COLORS.secondary.s10,
-  };
-
-  const totalCountStyle: React.CSSProperties = {
     fontSize: "14px",
-    color: COLORS.secondary.s07,
-    marginLeft: "auto",
+    transition: "background 0.2s",
   };
 
   const toggleButtonStyle: React.CSSProperties = {
@@ -76,10 +71,6 @@ const CategoryBreakdown: React.FC<CategoryBreakdownProps> = ({
     flexShrink: 0,
   };
 
-  const listStyle: React.CSSProperties = {
-    padding: "8px",
-  };
-
   const itemStyle: React.CSSProperties = {
     padding: "16px 24px",
     display: "flex",
@@ -91,49 +82,9 @@ const CategoryBreakdown: React.FC<CategoryBreakdownProps> = ({
     transition: "all 0.2s",
   };
 
-  const itemInfoStyle: React.CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    gap: "16px",
-  };
-
-  const itemIconStyle: React.CSSProperties = {
-    fontSize: "32px",
-    width: "48px",
-    height: "48px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    background: "white",
-    borderRadius: "10px",
-    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-  };
-
-  const itemDetailsStyle: React.CSSProperties = {
-    display: "flex",
-    flexDirection: "column",
-    gap: "4px",
-  };
-
-  const itemNameStyle: React.CSSProperties = {
-    fontSize: "18px",
-    fontWeight: 600,
-    color: COLORS.secondary.s10,
-  };
-
-  const itemCountStyle: React.CSSProperties = {
-    fontSize: "14px",
-    color: COLORS.secondary.s07,
-  };
-
-  const itemAmountStyle: React.CSSProperties = {
-    fontSize: "24px",
-    fontWeight: 700,
-    color: COLORS.secondary.s10,
-  };
-
   return (
     <div style={containerStyle}>
+      {/* Header Section */}
       <div
         style={totalStyle}
         onClick={() => setIsCollapsed(!isCollapsed)}
@@ -146,23 +97,32 @@ const CategoryBreakdown: React.FC<CategoryBreakdownProps> = ({
           }
         }}
       >
-        <span style={totalLabelStyle}>TOTAL:</span>
-        <span style={totalAmountStyle}>{formatAmount(total)}</span>
-        <span style={totalCountStyle}>({totalCount} transactions)</span>
+        <span style={{ fontSize: "14px", fontWeight: 600, color: COLORS.secondary.s08 }}>TOTAL:</span>
+        <span style={{ fontSize: "32px", fontWeight: 700, color: COLORS.secondary.s10 }}>{formatAmount(total)}</span>
+        <span style={{ fontSize: "14px", color: COLORS.secondary.s07, marginLeft: "auto" }}>
+          ({totalCount} transactions)
+        </span>
+
+        {/* Add Category Button */}
+        <button
+          style={addCategoryButtonStyle}
+          onMouseEnter={(e) => e.currentTarget.style.background = COLORS.primary.p06}
+          onMouseLeave={(e) => e.currentTarget.style.background = COLORS.primary.p05}
+          onClick={(e) => {
+            e.stopPropagation(); // Prevents the collapse trigger
+            setIsAddCategoryModalOpen(true);
+          }}
+        >
+          + Add Category
+        </button>
+
+        {/* Collapse Toggle */}
         <button
           style={toggleButtonStyle}
           aria-label={isCollapsed ? "Expand" : "Collapse"}
           onClick={(e) => {
             e.stopPropagation();
             setIsCollapsed(!isCollapsed);
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = COLORS.secondary.s04;
-            e.currentTarget.style.color = COLORS.secondary.s10;
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = COLORS.secondary.s03;
-            e.currentTarget.style.color = COLORS.secondary.s08;
           }}
         >
           <svg
@@ -180,8 +140,9 @@ const CategoryBreakdown: React.FC<CategoryBreakdownProps> = ({
         </button>
       </div>
 
+      {/* Expanded Category List */}
       {!isCollapsed && (
-        <div style={listStyle}>
+        <div style={{ padding: "8px" }}>
           {categories.map((category) => (
             <div
               key={category.category}
@@ -189,8 +150,7 @@ const CategoryBreakdown: React.FC<CategoryBreakdownProps> = ({
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = COLORS.secondary.s02;
                 e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow =
-                  "0 4px 12px rgba(0, 0, 0, 0.1)";
+                e.currentTarget.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.1)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.background = COLORS.secondary.s01;
@@ -198,23 +158,37 @@ const CategoryBreakdown: React.FC<CategoryBreakdownProps> = ({
                 e.currentTarget.style.boxShadow = "none";
               }}
             >
-              <div style={itemInfoStyle}>
-                <span style={itemIconStyle}>
+              <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                <span style={{
+                  fontSize: "32px", width: "48px", height: "48px", display: "flex", 
+                  alignItems: "center", justifyContent: "center", background: "white", 
+                  borderRadius: "10px", boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)"
+                }}>
                   {CATEGORY_EMOJIS[category.category] || "📊"}
                 </span>
-                <div style={itemDetailsStyle}>
-                  <div style={itemNameStyle}>{category.category}</div>
-                  <div style={itemCountStyle}>
-                    {category.count} transaction
-                    {category.count !== 1 ? "s" : ""}
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <div style={{ fontSize: "18px", fontWeight: 600, color: COLORS.secondary.s10 }}>{category.category}</div>
+                  <div style={{ fontSize: "14px", color: COLORS.secondary.s07 }}>
+                    {category.count} transaction{category.count !== 1 ? "s" : ""}
                   </div>
                 </div>
               </div>
-              <div style={itemAmountStyle}>{formatAmount(category.amount)}</div>
+              <div style={{ fontSize: "24px", fontWeight: 700, color: COLORS.secondary.s10 }}>{formatAmount(category.amount)}</div>
             </div>
           ))}
         </div>
       )}
+
+      {/* MODAL: Correctly passing props to your CategoryModal component */}
+      <CategoryModal 
+        isOpen={isAddCategoryModalOpen} 
+        onClose={() => setIsAddCategoryModalOpen(false)} 
+        onCategoryAdded={(newCat) => {
+            // Handle new category (e.g., refresh list from API)
+            console.log("Success:", newCat);
+            setIsAddCategoryModalOpen(false);
+        }}
+      />
     </div>
   );
 };
