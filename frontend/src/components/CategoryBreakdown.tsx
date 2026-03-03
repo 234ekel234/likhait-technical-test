@@ -46,7 +46,7 @@ const CategoryBreakdown: React.FC<CategoryBreakdownProps> = ({
   const addCategoryButtonStyle: React.CSSProperties = {
     marginLeft: "16px",
     padding: "8px 16px",
-    background: COLORS.primary.s05,
+    background: COLORS.primary.p05,
     color: "white",
     border: "none",
     borderRadius: "6px",
@@ -106,8 +106,8 @@ const CategoryBreakdown: React.FC<CategoryBreakdownProps> = ({
         {/* Add Category Button */}
         <button
           style={addCategoryButtonStyle}
-          onMouseEnter={(e) => e.currentTarget.style.background = COLORS.primary.s06}
-          onMouseLeave={(e) => e.currentTarget.style.background = COLORS.primary.s05}
+          onMouseEnter={(e) => e.currentTarget.style.background = COLORS.primary.p06}
+          onMouseLeave={(e) => e.currentTarget.style.background = COLORS.primary.p05}
           onClick={(e) => {
             e.stopPropagation(); // Prevents the collapse trigger
             setIsAddCategoryModalOpen(true);
