@@ -20,8 +20,10 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await handleSubmit();
-    if (!errors) {
+
+    const success = await handleSubmit();
+
+    if (success) {
       onClose();
     }
   };
