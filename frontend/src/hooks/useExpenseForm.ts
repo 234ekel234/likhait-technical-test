@@ -32,6 +32,7 @@ export function useExpenseForm({ initialData, onSubmit }: UseExpenseFormProps) {
 
   const validateForm = (): boolean => {
     const newErrors: Partial<ExpenseFormData> = {};
+    const today = formatDate(new Date());
 
     if (!formData.amount || Number(formData.amount) <= 0) {
       newErrors.amount = "Amount must be greater than 0";
@@ -47,6 +48,8 @@ export function useExpenseForm({ initialData, onSubmit }: UseExpenseFormProps) {
 
     if (!formData.date) {
       newErrors.date = "Date is required";
+    } else if (formData.date > today) {
+      newErrors.date = "Date cannot be in the future";
     }
 
     setErrors(newErrors);
@@ -56,9 +59,7 @@ export function useExpenseForm({ initialData, onSubmit }: UseExpenseFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsSubmitting(true);
     try {
